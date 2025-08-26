@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import * as opsgenie from 'opsgenie-sdk';
+import opsgenie from 'opsgenie-sdk';
 import { log, error } from './logger.js';
 
 interface OpsgenieTeam {

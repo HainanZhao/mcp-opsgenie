@@ -44,6 +44,11 @@ declare module 'opsgenie-sdk' {
     addNote(params: AlertActionParams, callback: (err: any, result: any) => void): void;
   }
 
-  export function configure(config: OpsgenieConfig): void;
-  export const alertV2: AlertV2;
+  interface OpsgenieSDK {
+    configure(config: OpsgenieConfig): void;
+    alertV2: AlertV2;
+  }
+
+  const opsgenie: OpsgenieSDK;
+  export = opsgenie;
 }

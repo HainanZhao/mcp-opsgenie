@@ -30,25 +30,30 @@ git clone <repository-url>
 cd mcp-opsgenie
 ```
 
-2. **Install dependencies:**
+2. **Set up the project:**
 ```bash
-npm install
+npm run setup
 ```
 
 3. **Configure your API key:**
 ```bash
-cp .env.example .env
 # Edit .env and add your OPSGENIE_API_KEY
 ```
 
-4. **Build the server:**
-```bash
-npm run build
-```
-
-5. **Test your setup:**
+4. **Test your setup:**
 ```bash
 npm test
+```
+
+## Available Commands
+
+```bash
+npm run setup      # Install dependencies, build, and create .env
+npm run build      # Build TypeScript to JavaScript
+npm run dev        # Start development server with auto-reload
+npm test           # Run tests to validate setup
+npm start          # Start the MCP server
+npm run clean      # Remove build artifacts
 ```
 
 ## Configuration
@@ -69,8 +74,22 @@ Add this server to your MCP client configuration. For Claude Desktop, add to you
 {
   "mcpServers": {
     "opsgenie": {
-      "command": "node",
-      "args": ["/path/to/mcp-opsgenie/dist/index.js"],
+      "command": "/path/to/mcp-opsgenie/dist/index.js",
+      "env": {
+        "OPSGENIE_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+**Alternative using npm/npx (if installed globally):**
+```json
+{
+  "mcpServers": {
+    "opsgenie": {
+      "command": "npx",
+      "args": ["mcp-opsgenie"],
       "env": {
         "OPSGENIE_API_KEY": "your_api_key_here"
       }

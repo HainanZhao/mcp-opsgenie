@@ -20,21 +20,19 @@ cd mcp-opsgenie
 
 2. **Install dependencies:**
 ```bash
-npm install
-# or
-make install
+npm run setup
 ```
 
 3. **Set up environment:**
 ```bash
-make setup
+# .env file is created automatically by npm run setup
 # Edit .env and add your OPSGENIE_API_KEY
 ```
 
 4. **Build and test:**
 ```bash
-make build
-make test
+npm run build
+npm test
 ```
 
 ## Project Structure
@@ -56,22 +54,19 @@ test.js           # Test script for API validation
 ### Building
 
 ```bash
-npm run build      # Compile TypeScript
-make build        # Alternative using Makefile
+npm run build     # Compile TypeScript
 ```
 
 ### Running in Development
 
 ```bash
-npm run dev       # Start with auto-reload using tsx
-make dev         # Alternative using Makefile
+npm run dev      # Start with auto-reload using tsx
 ```
 
 ### Testing
 
 ```bash
 npm test         # Build and run tests
-make test        # Alternative using Makefile
 ```
 
 The test script validates:
@@ -81,12 +76,13 @@ The test script validates:
 
 ### Git Workflow
 
-We use conventional git helpers:
+Use standard git commands:
 
 ```bash
-make status                    # Check git status
-make commit MSG="your message" # Add all files and commit
-make push                     # Push to remote repository
+git status              # Check status
+git add .               # Stage all changes
+git commit -m "message" # Commit with message
+git push origin main    # Push to remote
 ```
 
 ## Code Structure

@@ -1,8 +1,7 @@
 {
   "mcpServers": {
     "opsgenie": {
-      "command": "node",
-      "args": ["/path/to/mcp-opsgenie/dist/index.js"],
+      "command": "/path/to/mcp-opsgenie/dist/index.js",
       "env": {
         "OPSGENIE_API_KEY": "your_opsgenie_api_key_here"
       }
