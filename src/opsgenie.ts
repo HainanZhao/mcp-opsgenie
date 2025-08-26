@@ -39,11 +39,16 @@ export class OpsgenieClient {
       throw new Error('Opsgenie API key is required');
     }
 
-    // Configure Opsgenie SDK
-    opsgenie.configure({
-      host: 'https://api.opsgenie.com',
-      api_key: this.apiKey,
-    });
+    // Configure Opsgenie SDK - wrap in try-catch for better error handling
+    try {
+      opsgenie.configure({
+        host: 'https://api.opsgenie.com',
+        api_key: this.apiKey,
+      });
+    } catch (error) {
+      console.error('Failed to configure Opsgenie SDK:', error);
+      throw new Error(`Opsgenie SDK configuration failed: ${error}`);
+    }
   }
 
   async createAlert(params: {

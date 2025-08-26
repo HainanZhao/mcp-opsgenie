@@ -5,7 +5,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  Tool,
+  InitializeRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { OpsgenieClient } from './opsgenie.js';
 import { log, error } from './logger.js';
@@ -20,29 +20,52 @@ class OpsgeneMCPServer {
   private opsgenieClient: OpsgenieClient;
 
   constructor(args: ServerArgs = {}) {
-    this.server = new Server(
-      {
-        name: 'opsgenie-mcp-server',
-        version: '1.0.0',
-      },
-      {
-        capabilities: {
-          tools: {},
+    try {
+      this.server = new Server(
+        {
+          name: 'opsgenie-mcp-server',
+          version: '1.0.1',
         },
-      }
-    );
+        {
+          capabilities: {
+            tools: {},
+          },
+        }
+      );
 
-    this.opsgenieClient = new OpsgenieClient(args.apiKey);
-    this.setupHandlers();
+      // Initialize Opsgenie client with better error handling
+      this.opsgenieClient = new OpsgenieClient(args.apiKey);
+      
+      // Set up handlers after successful initialization
+      this.setupHandlers();
+      
+    } catch (error) {
+      console.error('Failed to initialize MCP server:', error);
+      throw error;
+    }
   }
 
   private setupHandlers(): void {
+    // Handle initialization
+    this.server.setRequestHandler(InitializeRequestSchema, async (request) => {
+      return {
+        protocolVersion: '2024-11-05',
+        capabilities: {
+          tools: {},
+        },
+        serverInfo: {
+          name: 'opsgenie-mcp-server',
+          version: '1.0.1',
+        },
+      };
+    });
+
     // List available tools
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [
           {
-            name: 'create_alert',
+            name: 'opsgenie_create_alert',
             description: 'Create a new alert in Opsgenie',
             inputSchema: {
               type: 'object',
@@ -92,7 +115,7 @@ class OpsgeneMCPServer {
             },
           },
           {
-            name: 'list_alerts',
+            name: 'opsgenie_list_alerts',
             description: 'List alerts from Opsgenie',
             inputSchema: {
               type: 'object',
@@ -130,7 +153,7 @@ class OpsgeneMCPServer {
             },
           },
           {
-            name: 'get_alert',
+            name: 'opsgenie_get_alert',
             description: 'Get details of a specific alert',
             inputSchema: {
               type: 'object',
@@ -149,7 +172,7 @@ class OpsgeneMCPServer {
             },
           },
           {
-            name: 'acknowledge_alert',
+            name: 'opsgenie_acknowledge_alert',
             description: 'Acknowledge an alert',
             inputSchema: {
               type: 'object',
@@ -180,7 +203,7 @@ class OpsgeneMCPServer {
             },
           },
           {
-            name: 'close_alert',
+            name: 'opsgenie_close_alert',
             description: 'Close an alert',
             inputSchema: {
               type: 'object',
@@ -211,7 +234,7 @@ class OpsgeneMCPServer {
             },
           },
           {
-            name: 'snooze_alert',
+            name: 'opsgenie_snooze_alert',
             description: 'Snooze an alert for a specified time',
             inputSchema: {
               type: 'object',
@@ -246,7 +269,7 @@ class OpsgeneMCPServer {
             },
           },
           {
-            name: 'unacknowledge_alert',
+            name: 'opsgenie_unacknowledge_alert',
             description: 'Remove acknowledgment from an alert',
             inputSchema: {
               type: 'object',
@@ -277,7 +300,7 @@ class OpsgeneMCPServer {
             },
           },
           {
-            name: 'add_note_to_alert',
+            name: 'opsgenie_add_note_to_alert',
             description: 'Add a note to an alert',
             inputSchema: {
               type: 'object',
@@ -307,7 +330,7 @@ class OpsgeneMCPServer {
               required: ['identifier', 'note'],
             },
           },
-        ] as Tool[],
+        ],
       };
     });
 
@@ -317,21 +340,21 @@ class OpsgeneMCPServer {
 
       try {
         switch (name) {
-          case 'create_alert':
+          case 'opsgenie_create_alert':
             return await this.handleCreateAlert(args);
-          case 'list_alerts':
+          case 'opsgenie_list_alerts':
             return await this.handleListAlerts(args);
-          case 'get_alert':
+          case 'opsgenie_get_alert':
             return await this.handleGetAlert(args);
-          case 'acknowledge_alert':
+          case 'opsgenie_acknowledge_alert':
             return await this.handleAcknowledgeAlert(args);
-          case 'close_alert':
+          case 'opsgenie_close_alert':
             return await this.handleCloseAlert(args);
-          case 'snooze_alert':
+          case 'opsgenie_snooze_alert':
             return await this.handleSnoozeAlert(args);
-          case 'unacknowledge_alert':
+          case 'opsgenie_unacknowledge_alert':
             return await this.handleUnacknowledgeAlert(args);
-          case 'add_note_to_alert':
+          case 'opsgenie_add_note_to_alert':
             return await this.handleAddNoteToAlert(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -451,9 +474,27 @@ class OpsgeneMCPServer {
   }
 
   async run(): Promise<void> {
-    const transport = new StdioServerTransport();
-    await this.server.connect(transport);
-    log('Opsgenie MCP Server started');
+    try {
+      const transport = new StdioServerTransport();
+      
+      // Add error handlers for the transport
+      transport.onclose = () => {
+        console.error('MCP transport closed');
+      };
+      
+      transport.onerror = (error: any) => {
+        console.error('MCP transport error:', error);
+      };
+      
+      await this.server.connect(transport);
+      log('Opsgenie MCP Server started and ready');
+      
+      // The server will now listen for MCP requests
+      
+    } catch (error) {
+      console.error('Failed to start MCP server:', error);
+      throw error;
+    }
   }
 }
 
@@ -461,15 +502,37 @@ async function main(): Promise<void> {
   const apiKey = process.env.OPSGENIE_API_KEY;
   
   if (!apiKey) {
-    error('OPSGENIE_API_KEY environment variable is required');
+    console.error('ERROR: OPSGENIE_API_KEY environment variable is required');
     process.exit(1);
   }
-
-  const server = new OpsgeneMCPServer({ apiKey });
-  await server.run();
+  
+  try {
+    const server = new OpsgeneMCPServer({ apiKey });
+    await server.run();
+    
+    // Keep the process alive
+    process.on('SIGINT', () => {
+      console.error('Received SIGINT, shutting down gracefully');
+      process.exit(0);
+    });
+    
+    process.on('SIGTERM', () => {
+      console.error('Received SIGTERM, shutting down gracefully');
+      process.exit(0);
+    });
+    
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Check if this script is being run directly (not imported as a module)
+const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
+                     process.argv[1].endsWith('/mcp-opsgenie') ||
+                     process.argv[1].endsWith('\\mcp-opsgenie');
+
+if (isMainModule) {
   main().catch((error) => {
     console.error('Server error:', error);
     process.exit(1);
