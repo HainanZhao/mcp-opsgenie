@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // Simple test script to verify the Opsgenie client works
-import { OpsgenieClient } from './src/opsgenie.js';
+import { OpsgenieClient } from './dist/opsgenie.js';
 import 'dotenv/config';
 
 async function testOpsgenieClient() {
