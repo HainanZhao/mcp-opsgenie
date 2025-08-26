@@ -25,8 +25,16 @@
     "prepublishOnly": "npm run test"
   },
   "keywords": ["mcp", "opsgenie", "alerts"],
-  "author": "",
+  "author": "Hainan Zhao",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HainanZhao/mcp-opsgenie.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HainanZhao/mcp-opsgenie/issues"
+  },
+  "homepage": "https://github.com/HainanZhao/mcp-opsgenie#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.6.0",
     "opsgenie-sdk": "^0.5.1",

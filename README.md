@@ -26,7 +26,7 @@ This MCP server provides comprehensive Opsgenie integration with the following t
 
 1. **Download or clone this server:**
 ```bash
-git clone <repository-url>
+git clone https://github.com/HainanZhao/mcp-opsgenie.git
 cd mcp-opsgenie
 ```
 
