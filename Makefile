@@ -1,4 +1,4 @@
-.PHONY: install build start dev test clean help
+.PHONY: install build start dev test clean help status commit push
 
 # Default target
 help:
@@ -9,6 +9,9 @@ help:
 	@echo "  dev        - Start development server with auto-reload"
 	@echo "  test       - Run tests"
 	@echo "  clean      - Clean build artifacts"
+	@echo "  status     - Show git status"
+	@echo "  commit     - Add all changes and commit (use: make commit MSG='your message')"
+	@echo "  push       - Push changes to remote repository"
 	@echo "  help       - Show this help message"
 
 install:
@@ -40,3 +43,18 @@ setup: install
 	else \
 		echo ".env file already exists"; \
 	fi
+
+# Git helpers
+status:
+	git status
+
+commit:
+	@if [ -z "$(MSG)" ]; then \
+		echo "Usage: make commit MSG='your commit message'"; \
+		exit 1; \
+	fi
+	git add .
+	git commit -m "$(MSG)"
+
+push:
+	git push origin main
