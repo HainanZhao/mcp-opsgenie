@@ -1,6 +1,6 @@
 # Opsgenie MCP Server
 
-A Model Context Protocol (MCP) server for integrating with Opsgenie's alert management system.
+A Model Context Protocol (MCP) server for integrating with Opsgenie's alert management system. This server allows you to manage Opsgenie alerts through any MCP-compatible client like Claude Desktop.
 
 ## Features
 
@@ -15,62 +15,55 @@ This MCP server provides comprehensive Opsgenie integration with the following t
 - **unacknowledge_alert**: Remove acknowledgment from alerts
 - **add_note_to_alert**: Add notes to existing alerts
 
-## Setup
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
-- Opsgenie API key
+- Node.js 18+
+- Opsgenie API key ([Get one here](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/))
 
 ### Installation
 
-1. Clone this repository:
+1. **Download or clone this server:**
 ```bash
 git clone <repository-url>
 cd mcp-opsgenie
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Create environment configuration:
+3. **Configure your API key:**
 ```bash
 cp .env.example .env
+# Edit .env and add your OPSGENIE_API_KEY
 ```
 
-4. Edit `.env` file and add your Opsgenie API key:
-```
-OPSGENIE_API_KEY=your_actual_api_key_here
-```
-
-### Building
-
+4. **Build the server:**
 ```bash
 npm run build
 ```
 
-### Running
-
+5. **Test your setup:**
 ```bash
-npm start
-```
-
-For development with auto-reload:
-```bash
-npm run dev
+npm test
 ```
 
 ## Configuration
 
-The server requires an Opsgenie API key which can be provided via:
-- Environment variable: `OPSGENIE_API_KEY`
-- Through the MCP client configuration
+### Environment Variables
 
-## MCP Client Configuration
+Create a `.env` file with your Opsgenie API key:
 
-Add this server to your MCP client configuration:
+```env
+OPSGENIE_API_KEY=your_opsgenie_api_key_here
+```
+
+### MCP Client Configuration
+
+Add this server to your MCP client configuration. For Claude Desktop, add to your config file:
 
 ```json
 {
@@ -86,91 +79,103 @@ Add this server to your MCP client configuration:
 }
 ```
 
+**Claude Desktop config locations:**
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
 ## Usage Examples
 
 ### Creating an Alert
-```json
-{
-  "tool": "create_alert",
-  "arguments": {
-    "message": "Database connection failed",
-    "description": "Unable to connect to production database",
-    "priority": "P1",
-    "teams": [{"name": "Backend Team"}],
-    "tags": ["database", "production", "critical"]
-  }
-}
-```
 
-### Listing Alerts
-```json
-{
-  "tool": "list_alerts",
-  "arguments": {
-    "query": "status:open",
-    "limit": 10,
-    "sort": "createdAt",
-    "order": "desc"
-  }
-}
-```
+Ask your MCP client to create an alert:
 
-### Acknowledging an Alert
-```json
-{
-  "tool": "acknowledge_alert",
-  "arguments": {
-    "identifier": "alert-id-here",
-    "note": "Investigating the issue",
-    "user": "john.doe@company.com"
-  }
-}
-```
+> "Create a P1 alert in Opsgenie with message 'Database connection failed' for the Backend Team"
+
+Or provide specific details:
+- **Message**: "Database connection failed"
+- **Priority**: P1 (Critical)
+- **Teams**: Backend Team
+- **Tags**: database, production, critical
+- **Description**: Detailed problem description
+
+### Managing Alerts
+
+- **List alerts**: "Show me all open P1 alerts"
+- **Get alert details**: "Get details for alert ID abc123"
+- **Acknowledge**: "Acknowledge alert abc123 with note 'Investigating'"
+- **Close alert**: "Close alert abc123 with note 'Issue resolved'"
+- **Snooze**: "Snooze alert abc123 until 2024-12-25 10:00 AM"
+
+### Searching Alerts
+
+Use Opsgenie's powerful query syntax:
+- "List alerts with status open and priority P1"
+- "Show me alerts tagged with 'database' from the last 24 hours"
+- "Find all unacknowledged alerts for the Backend Team"
 
 ## API Reference
 
-### Alert Creation
-- **message** (required): Alert message
-- **alias**: Client-defined identifier
-- **description**: Detailed description
-- **teams**: Array of team objects with name field
-- **tags**: Array of string tags
-- **details**: Additional key-value details
-- **entity**: Entity field
-- **priority**: P1, P2, P3, P4, or P5
+### Alert Priorities
 
-### Alert Management
-- **identifier** (required): Alert ID, tiny ID, or alias
-- **identifierType**: Type of identifier ('id', 'tiny', 'alias')
-- **note**: Additional note for actions
-- **source**: Source of the action
-- **user**: User performing the action
+- **P1**: Critical - Immediate action required
+- **P2**: High - Quick response needed  
+- **P3**: Medium - Normal priority (default)
+- **P4**: Low - Can be addressed during business hours
+- **P5**: Informational - For awareness
 
-## Error Handling
+### Search Query Examples
 
-The server provides detailed error messages for:
-- Authentication failures
-- Invalid parameters
-- Network connectivity issues
-- Opsgenie API errors
+- `status:open` - Open alerts only
+- `priority:P1` - P1 priority alerts
+- `tag:production` - Alerts with "production" tag
+- `team:"Backend Team"` - Alerts for specific team
+- `createdAt>"2024-01-01"` - Alerts after a date
+- `status:open AND priority:P1` - Combine conditions
 
-## Development
+## Troubleshooting
 
-### Project Structure
-```
-src/
-├── index.ts       # Main MCP server
-├── opsgenie.ts    # Opsgenie client wrapper
-└── logger.ts      # Logging utilities
-```
+### Common Issues
 
-### Contributing
+**"Authentication failed"**
+- Verify your API key is correct in the `.env` file
+- Ensure the API key has necessary permissions in Opsgenie
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+**"Cannot find module"**
+- Run `npm install` to install dependencies
+- Make sure you've run `npm run build` to compile TypeScript
+
+**"No alerts found"**
+- Check if you have alerts in your Opsgenie account
+- Verify your search query syntax
+- Try listing without filters first
+
+### Getting Help
+
+- Check the [examples documentation](EXAMPLES.md) for detailed usage patterns
+- Review your Opsgenie API permissions
+- Ensure network connectivity to `api.opsgenie.com`
+
+## What You Can Do
+
+With this MCP server, you can:
+
+✅ **Create alerts** with full customization (priority, teams, tags, etc.)  
+✅ **Search and filter** alerts using Opsgenie's query language  
+✅ **Manage alert lifecycle** (acknowledge, close, snooze)  
+✅ **Add notes** and collaborate on incident resolution  
+✅ **Integrate** with any MCP-compatible AI assistant  
+✅ **Automate** alert management through natural language  
+
+## Security Notes
+
+- Keep your API key secure and never commit it to version control
+- Use environment variables for configuration
+- Consider using API keys with minimal required permissions
+- The server only makes outbound connections to Opsgenie's API
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
 
 ## License
 
