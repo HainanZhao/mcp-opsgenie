@@ -499,6 +499,12 @@ class OpsgeneMCPServer {
 }
 
 async function main(): Promise<void> {
+  // Debug logging for Windows compatibility
+  console.error(`MCP Opsgenie Server starting...`);
+  console.error(`Platform: ${process.platform}`);
+  console.error(`Node version: ${process.version}`);
+  console.error(`Args: ${process.argv.join(' ')}`);
+  
   const apiKey = process.env.OPSGENIE_API_KEY;
   
   if (!apiKey) {
@@ -507,8 +513,11 @@ async function main(): Promise<void> {
   }
   
   try {
+    console.error('Initializing Opsgenie MCP Server...');
     const server = new OpsgeneMCPServer({ apiKey });
+    console.error('Starting server...');
     await server.run();
+    console.error('Server started successfully');
     
     // Keep the process alive
     process.on('SIGINT', () => {
@@ -523,18 +532,25 @@ async function main(): Promise<void> {
     
   } catch (error) {
     console.error('Failed to start server:', error);
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
     process.exit(1);
   }
 }
 
 // Check if this script is being run directly (not imported as a module)
+// Handle various execution contexts including Windows
 const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
                      process.argv[1].endsWith('/mcp-opsgenie') ||
-                     process.argv[1].endsWith('\\mcp-opsgenie');
+                     process.argv[1].endsWith('\\mcp-opsgenie') ||
+                     process.argv[1].endsWith('/mcp-opsgenie.js') ||
+                     process.argv[1].endsWith('\\mcp-opsgenie.js') ||
+                     process.argv[1].includes('mcp-opsgenie');
 
 if (isMainModule) {
   main().catch((error) => {
-    console.error('Server error:', error);
+    console.error('MCP Opsgenie Server error:', error);
+    console.error('Stack trace:', error.stack);
     process.exit(1);
   });
 }
