@@ -487,7 +487,6 @@ class OpsgeneMCPServer {
       };
       
       await this.server.connect(transport);
-      log('Opsgenie MCP Server started and ready');
       
       // The server will now listen for MCP requests
       
@@ -499,12 +498,6 @@ class OpsgeneMCPServer {
 }
 
 async function main(): Promise<void> {
-  // Debug logging for Windows compatibility
-  console.error(`MCP Opsgenie Server starting...`);
-  console.error(`Platform: ${process.platform}`);
-  console.error(`Node version: ${process.version}`);
-  console.error(`Args: ${process.argv.join(' ')}`);
-  
   const apiKey = process.env.OPSGENIE_API_KEY;
   
   if (!apiKey) {
@@ -513,11 +506,8 @@ async function main(): Promise<void> {
   }
   
   try {
-    console.error('Initializing Opsgenie MCP Server...');
     const server = new OpsgeneMCPServer({ apiKey });
-    console.error('Starting server...');
     await server.run();
-    console.error('Server started successfully');
     
     // Keep the process alive
     process.on('SIGINT', () => {

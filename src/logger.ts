@@ -1,5 +1,5 @@
 export function log(...args: any[]): void {
-  console.log(new Date().toISOString(), '[INFO]', ...args);
+  console.error(new Date().toISOString(), '[INFO]', ...args);
 }
 
 export function error(...args: any[]): void {
